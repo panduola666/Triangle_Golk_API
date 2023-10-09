@@ -12,6 +12,7 @@ const resError = require('./service/resError')
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const keyWordsRouter = require('./routes/keyWords');
+const courseRouter = require('./routes/course')
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use(cors());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/keyWords', keyWordsRouter);
+app.use('/course', courseRouter);
 
 // 404
 app.use((req, res, next) => {
