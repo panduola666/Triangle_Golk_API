@@ -4,40 +4,25 @@ var router = express.Router();
 const response = require('../service/response')
 const handleFetch = require('../service/handleFetch')
 const isAuth = require('../middleware/isAuth')
+const isAdmin = require('../middleware/isAdmin')
 
 const KeyWord = require('../models/Keyword')
-// 新增
-router.post('/', isAuth, handleFetch(async(req, res, next) => {
-    const { word } = req.body
-    
-    if(!word) response.isEmpty(req, ['word'], next)
 
-    const data = await KeyWord.create({
-        word: req.body.word
-    })
-
+router.get('/admin', isAuth, isAdmin, handleFetch(async(req, res, next) => {
+    const data = await KeyWord.find()
     response.success(200, res, data)
+}))
+
+// 修改 => 覆蓋全部
+router.put('/admin', isAuth, isAdmin, handleFetch(async(req, res, next) => {
+    const { words = [] } = req.body
+    await KeyWord.deleteMany({})
+    if(words.length) {
+        await KeyWord.create(words.map(word => ({word})))
+    }
+
+    response.success(200, res, {msg: '修改成功'})
 }));
 
-
-// 刪除
-router.delete('/:id', async(req, res, next) => {
-    const { id } = req.params
-});
-
-
-
-
-
-
-
-// 刪除全部測試資料
-router.delete('/', async(req, res, next) => {
-    await KeyWord.deleteMany({})
-    res.status(200).json({
-        code: 'success',
-        msg: '已刪除全部'
-    })
-});
 
 module.exports = router;
