@@ -21,6 +21,8 @@ const interface = {
     type: String,
     required: [true, '課程網址不可為空']
   },
+  // 注意: 新增後 rooms 不允許修改, 刪除資料後也要一起刪掉相關資料
+  rooms: [{name:String, total: Number}]
 }
 const option = {
   versionKey: false
