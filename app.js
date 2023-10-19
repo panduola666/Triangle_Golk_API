@@ -13,7 +13,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const keyWordsRouter = require('./routes/keyWords');
 const courseRouter = require('./routes/course')
-
+const commentRouter = require('./routes/comment')
 const app = express();
 
 //  預期外的紅字錯誤 => 程式出現重大錯誤時
@@ -38,9 +38,10 @@ app.use(cors());
 
 // 路由新增
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/keyWords', keyWordsRouter);
+app.use('/user', usersRouter);
+app.use('/keyWord', keyWordsRouter);
 app.use('/course', courseRouter);
+app.use('/comment', commentRouter);
 
 // 404
 app.use((req, res, next) => {

@@ -99,7 +99,27 @@ router.patch('/admin/:id', isAuth, isAdmin, handleFetch(async(req,res,next) => {
   }
 }))
 
-// 刪除課程
+// 批量刪除
+router.delete('/admin/more',isAuth, isAdmin, handleFetch(async(req, res, next) => {
+  const { courses } = req.body
+  if(!courses) {
+    return response.isEmpty(req, ['courses'], next)
+  }
+  if(!Array.isArray(courses) || courses.some(obj => !obj.id)) {
+    return response.error(400, '欄位格式錯誤', next)
+  }
+  if(!courses.length) {
+    return response.success(201, res, {msg: '刪除成功'})
+  }
+  const ids = courses.map(item => item.id)
+  try{
+    await Course.deleteMany({_id: { $in: ids}})
+    response.success(201, res, {msg: '刪除成功'})
+  } catch(err) {
+    response.error(404, '內含錯誤 id', next)
+  }
+}))
+// 刪除課程單筆
 router.delete('/admin/:id', isAuth, isAdmin, handleFetch(async(req,res,next) => {
   const { id } = req.params
   if(!id) {
@@ -113,6 +133,7 @@ router.delete('/admin/:id', isAuth, isAdmin, handleFetch(async(req,res,next) => 
     response.error(404, '查無此 id', next)
   }
 }))
+
 
 // 查看申請新課
 router.get('/admin/apply',isAuth,isAdmin, handleFetch(async(req, res, next) => {
