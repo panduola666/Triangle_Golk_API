@@ -36,6 +36,26 @@ router.post('/apply',isAuth, handleFetch(async(req, res, next) => {
 }))
 
 // 後台
+// 全部課程 + 分頁
+router.get('/admin',isAuth, isAdmin,handleFetch(async(req,res,next) => {
+  const { platform , title: courseTitle } = req.body
+  if(!platform) {
+    return response.isEmpty(req, ['platform'], next)
+   }
+   const option = {
+    sort: {},
+    filter: {platform}
+  }
+
+  if(courseTitle) {
+    option.filter.title = courseTitle
+  }
+
+
+  const data = await pagination(Course, option, req, next)
+
+  response.success(200, res, data)
+}))
 
 // 新增課程
 router.post('/admin/add', isAuth, isAdmin, handleFetch(async(req,res,next) => {
@@ -46,7 +66,7 @@ router.post('/admin/add', isAuth, isAdmin, handleFetch(async(req,res,next) => {
   if(!isURL(url)) {
     return response.error(400, 'url 需為網址格式', next)
   }
-  if(!Array.isArray(tags) || !Array.isArray(rooms)) {
+  if((tags && !Array.isArray(tags)) || (rooms && !Array.isArray(rooms))) {
     return response.error(400, '欄位格式錯誤', next)
   }
   
@@ -67,12 +87,16 @@ router.patch('/admin/:id', isAuth, isAdmin, handleFetch(async(req,res,next) => {
   if(!isURL(url)) {
     return response.error(400, 'url 需為網址格式', next)
   }
-  if(!Array.isArray(tags) || !Array.isArray(rooms)) {
+  if((tags && !Array.isArray(tags)) || (rooms && !Array.isArray(rooms))) {
     return response.error(400, '欄位格式錯誤', next)
   }
-  
-  const data = await Course.findByIdAndUpdate(id, {title, platform, tags, cover, url, rooms})
-  response.success(201, res, {msg: '修改成功'})
+
+  try{
+    await Course.findByIdAndUpdate(id, {title, platform, tags, cover, url, rooms})
+    response.success(201, res, {msg: '修改成功'})
+  } catch(err) {
+    response.error(404, '查無此 id', next)
+  }
 }))
 
 // 刪除課程
@@ -81,13 +105,22 @@ router.delete('/admin/:id', isAuth, isAdmin, handleFetch(async(req,res,next) => 
   if(!id) {
     return response.error(404, '請輸入要刪除的課程 id', next)
   }
-  await Course.findByIdAndDelete(id)
-  response.success(201, res, {msg: '刪除成功'})
+  
+  try{
+    await Course.findByIdAndDelete(id)
+    response.success(201, res, {msg: '刪除成功'})
+  } catch(err) {
+    response.error(404, '查無此 id', next)
+  }
 }))
 
 // 查看申請新課
 router.get('/admin/apply',isAuth,isAdmin, handleFetch(async(req, res, next) => {
   const { isPassed = -1, startDate , endDate } = req.body
+
+  if(![0, 1, -1].includes(isPassed)) {
+   return response.isEmpty(req, ['isPassed'], next)
+  }
 
   if(!isNumeric(isPassed)) {
     return response.error(400, 'isPassed 型別錯誤', next)
