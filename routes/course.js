@@ -46,13 +46,44 @@ router.post('/admin/add', isAuth, isAdmin, handleFetch(async(req,res,next) => {
   if(!isURL(url)) {
     return response.error(400, 'url 需為網址格式', next)
   }
+  if(!Array.isArray(tags) || !Array.isArray(rooms)) {
+    return response.error(400, '欄位格式錯誤', next)
+  }
+  
   const data = await Course.create({title, platform, tags, cover, url, rooms})
   response.success(201, res, data)
 }))
 
 // 修改課程
+router.patch('/admin/:id', isAuth, isAdmin, handleFetch(async(req,res,next) => {
+  const { id } = req.params
+  if(!id) {
+    return response.error(404, '請輸入要修改的課程 id', next)
+  }
+  const {title, platform, tags, cover, url, rooms} = req.body
+  if(!title || !platform || !cover || !url) {
+    return response.isEmpty(req, ['title', 'platform', 'cover', 'url'], next)
+  }
+  if(!isURL(url)) {
+    return response.error(400, 'url 需為網址格式', next)
+  }
+  if(!Array.isArray(tags) || !Array.isArray(rooms)) {
+    return response.error(400, '欄位格式錯誤', next)
+  }
+  
+  const data = await Course.findByIdAndUpdate(id, {title, platform, tags, cover, url, rooms})
+  response.success(201, res, {msg: '修改成功'})
+}))
 
 // 刪除課程
+router.delete('/admin/:id', isAuth, isAdmin, handleFetch(async(req,res,next) => {
+  const { id } = req.params
+  if(!id) {
+    return response.error(404, '請輸入要刪除的課程 id', next)
+  }
+  await Course.findByIdAndDelete(id)
+  response.success(201, res, {msg: '刪除成功'})
+}))
 
 // 查看申請新課
 router.get('/admin/apply',isAuth,isAdmin, handleFetch(async(req, res, next) => {
