@@ -1,8 +1,14 @@
 const mongoose = require('mongoose')
 
 const interface = {
-    userId: mongoose.Schema.ObjectId,
-    courseId: mongoose.Schema.ObjectId,
+    userId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'user'
+    },
+    courseId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'course'
+    },
     canEdit: {
         type: Boolean,
         default: true
@@ -13,18 +19,30 @@ const interface = {
     },
     showName: {
         type: Number,
+        enum: {
+          values: [0, 1],
+          message: '僅可選擇是否顯示'
+        },
         default: 1
     },
     score: {
         type: Number,
+        enum:  {
+          values: [1, 2, 3, 4, 5],
+          message: '評分可選區間為 1 ~ 5'
+        },
         required: [true, '課程評分不可為空']
     },
     content: {
         type: String,
-        require: [true, '內容不可為空']
+        required: [true, '內容不可為空']
     },
     theme: {
         type: Number,
+        enum: {
+          values: [0, 1],
+          message: '目前僅提供兩種主題'
+        },
         default: 1
     },
     isPassed: {
@@ -34,7 +52,7 @@ const interface = {
       },
       failContent: {
         type: String,
-        required: [true, '失敗原因不可為空']
+        default: ''
       },
       likes: {
         type: [mongoose.Schema.ObjectId],
