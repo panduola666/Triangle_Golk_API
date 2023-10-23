@@ -5,6 +5,8 @@ const router = express.Router()
 const handleFetch = require('../service/handleFetch')
 const response = require('../service/response');
 const Comment = require('../models/Comment')
+const Course = require('../models/Course')
+const User = require('../models/User')
 
 const isAuth = require('../middleware/isAuth');
 const isAdmin = require('../middleware/isAdmin');
@@ -31,15 +33,17 @@ router.post('/add', isAuth, handleFetch(async(req,res,next) => {
   response.success(201, res, data)
 }))
 // 修改評價
+router.patch('/edit', isAuth, handleFetch(async(req, res, next) => {
+
+}))
 
 // 課程內頁評價 - 依照 最新 or 最熱排序(分頁)
-router.get('/:courseId/:sort', isAuth, handleFetch(async(req, res, next) => {
-  const { courseId, sort } = req.params
-  const option = {
-    sort: {sort},
-    filter: {courseId}
-  }
-  const data = await pagination(Comment, option, req, next)
+router.get('/:courseId', isAuth, handleFetch(async(req, res, next) => {
+  const { courseId } = req.params
+  const {size = 5, page = 1, sort = 'timer' } = req.body
+
+  console.log(courseId);
+  const data = await Comment.find({courseId}).populate({path: 'userId', select: 'avatarId nickName'}).sort({sort}).skip(size * (page - 1)).limit(size)
   response.success(200, res, data)
 }))
 

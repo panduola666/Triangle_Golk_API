@@ -7,7 +7,8 @@ const interface = {
     },
     courseId: {
       type: mongoose.Schema.ObjectId,
-      ref: 'course'
+      ref: 'course',
+      required: [true, '請選擇要評價的課程']
     },
     canEdit: {
         type: Boolean,
