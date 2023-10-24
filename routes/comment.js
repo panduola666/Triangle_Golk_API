@@ -30,11 +30,29 @@ router.post('/add', isAuth, handleFetch(async(req,res,next) => {
   const data = await Comment.create({
     userId: req.user._id,
     courseId, image, showName, score, content, theme})
-  response.success(201, res, data)
+  response.success(201, res, {msg: '評價成功，我們將於 7-14 天內審核證明，若成功即可在課程頁面內查看自已的評價！'})
 }))
-// 修改評價
-router.patch('/edit', isAuth, handleFetch(async(req, res, next) => {
 
+// 修改評價
+router.patch('/edit/:id', isAuth, handleFetch(async(req, res, next) => {
+  const { id } = req.params
+  if(!id) {
+    return response.error(404, '請輸入要修改的評價 id', next)
+  }
+  
+  const { courseId, image, showName, score, content, theme } = req.body
+  if (!courseId) {
+    return response.error(404, '請選擇一門課程來評價', next)
+  }
+  if(!image || !content ) {
+    return response.isEmpty(req, ['image', 'content'], next)
+  }
+  if(!isURL(image)) {
+    return response.error(404, '完課證明檔案格式錯誤', next)
+  }
+  await Comment.findByIdAndUpdate(id,{
+    courseId, image, showName, score, content, theme})
+  response.success(201, res, {msg: '修改完成'})
 }))
 
 // 課程內頁評價 - 依照 最新 or 最熱排序(分頁)
@@ -79,5 +97,27 @@ router.get('/admin', isAuth, isAdmin, handleFetch(async(req, res, next) => {
 }))
 
 // 修改審核結果
+router.patch('/admin/edit/:id', isAuth, isAdmin, handleFetch(async(req, res, next) => {
+  const { id } = req.params
+  if(!id) {
+    return response.error(404, '請輸入要修改的評價 id', next)
+  }
+
+  const { isPassed , failContent = ''} = req.body
+  switch(isPassed) {
+    case 0: // 審核失敗
+      if(!failContent) {
+        return response.error(400, '請選擇錯誤原因', next)
+      }
+
+      break
+    case 1: // 審核通過
+    await Comment.findByIdAndUpdate(id)
+      break
+    default:
+      return response.error(400, '錯誤操作', next)
+      break
+  }
+}))
 
 module.exports = router

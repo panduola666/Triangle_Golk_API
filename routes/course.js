@@ -179,4 +179,6 @@ router.patch('/admin/apply/:id',isAuth,isAdmin, handleFetch(async(req, res, next
   }
 }))
 
+// 審核申請新課 - 通過 => 新增課程並給使用者通知
+
 module.exports = router
