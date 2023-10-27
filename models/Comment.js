@@ -59,10 +59,10 @@ const interface = {
         type: [mongoose.Schema.ObjectId],
         default: []
       },
-      likesNum: {
-        type: Number,
-        default: 0
-      },
+      // likesNum: {
+      //   type: Number,
+      //   default: 0
+      // },
       timer: {
         type: Number,
         default: new Date().getTime()
