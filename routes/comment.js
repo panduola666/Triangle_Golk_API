@@ -122,7 +122,18 @@ router.get('/:courseId', isAuth, handleFetch(async(req, res, next) => {
   const {size = 5, page = 1, sort = 'timer' } = req.body
 
   const data = await Comment.find({courseId}).populate({path: 'userId', select: 'avatarId nickName'}).sort({[sort]: -1}).skip(size * (page - 1)).limit(size)
-  response.success(200, res, data)
+  const totalCount = await Comment.find({courseId}).count()
+      const totalPage = Math.ceil(totalCount / size)
+  response.success(200, res, {
+    data,
+    pagination: {
+      totalCount,
+      page,
+      hasPre: page > 1,
+      hasNext: page < totalPage,
+      totalPage 
+    }
+  })
 }))
 
 module.exports = router
